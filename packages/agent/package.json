@@ -1,0 +1,35 @@
+{
+  "name": "@velocityvault/agent",
+  "version": "1.0.0",
+  "description": "VelocityVault AI Agent - Monitors Yellow sessions and executes trades",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "monitor": "tsx src/monitor.ts"
+  },
+  "keywords": [
+    "defi",
+    "trading",
+    "agent",
+    "yellow-network",
+    "lifi"
+  ],
+  "author": "VelocityVault",
+  "license": "MIT",
+  "dependencies": {
+    "@erc7824/nitrolite": "^0.1.0",
+    "@lifi/sdk": "^3.0.0",
+    "dotenv": "^16.4.1",
+    "ethers": "^6.10.0",
+    "viem": "^2.19.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
