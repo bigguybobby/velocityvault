@@ -1,128 +1,91 @@
-# VelocityVault: The Agentic Liquidity Mesh
+# 🏗 Scaffold-ETH 2
 
-**HackMoney 2026 Submission**  
-**Deadline:** February 11, 2026 (9 days)  
-**Target:** All 6 sponsor prizes ($56k total)
+<h4 align="center">
+  <a href="https://docs.scaffoldeth.io">Documentation</a> |
+  <a href="https://scaffoldeth.io">Website</a>
+</h4>
 
-## Pitch
+🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
 
-A gasless, session-based interface (Yellow) that controls an autonomous AI Agent. This Agent manages a global treasury on Arc (USDC), executes privacy-preserving strategies on Uniswap v4, routes capital via LI.FI, and hedges positions on Sui using DeepBook—all tied to a human-readable ENS identity.
+> [!NOTE]
+> 🤖 Scaffold-ETH 2 is AI-ready! It has everything agents need to build on Ethereum. Check `.agents/`, `.claude/`, `.opencode` or `.cursor/` for more info.
 
-## Architecture
+⚙️ Built using NextJS, RainbowKit, Foundry/Hardhat, Wagmi, Viem, and Typescript.
+
+- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
+- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
+- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
+- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
+- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+
+![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+
+## Requirements
+
+Before you begin, you need to install the following tools:
+
+- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
+- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
+- [Git](https://git-scm.com/downloads)
+
+## Quickstart
+
+To get started with Scaffold-ETH 2, follow the steps below:
+
+1. Install the latest version of Scaffold-ETH 2
 
 ```
-User → Yellow UI (gasless sessions)
-         ↓
-    AI Agent (off-chain)
-         ↓
-    Arc Treasury (USDC vault)
-         ↓
-    LI.FI (cross-chain routing)
-         ↓
-    ├─→ Uniswap v4 (EVM trading + custom hooks)
-    └─→ Sui DeepBook (high-frequency hedging)
-         ↓
-    ENS Identity (agent.eth - stores state/PnL)
+npx create-eth@latest
 ```
 
-## Tech Stack Integration
+This command will install all the necessary packages and dependencies, so it might take a while.
 
-| Sponsor | Integration | Prize Target |
-|---------|-------------|--------------|
-| Yellow | Session-based gasless UI (Nitrolite SDK) | $15k |
-| Arc | USDC treasury vault (Circle Gateway) | $10k |
-| Uniswap v4 | Agentic trading hooks | $10k |
-| Sui | DeepBook CLOB hedging | $10k |
-| LI.FI | Cross-chain routing layer | $6k |
-| ENS | Agent identity + state storage | $5k |
+> [!NOTE]
+> You can also initialize your project with one of our extensions to add specific features or starter-kits. Learn more in our [extensions documentation](https://docs.scaffoldeth.io/extensions/).
 
-## 9-Day Sprint Plan
+2. Run a local network in the first terminal:
 
-### Phase 1: The Core (Days 1-3) - Arc + Yellow
-**Goal:** Establish the "Bank" and the "Remote Control"
+```
+yarn chain
+```
 
-**Deliverables:**
-- [ ] Arc vault contract (USDC treasury)
-- [ ] Yellow SDK frontend (gasless session UI)
-- [ ] Basic deposit/withdraw flow
-- [ ] "Wow factor": rapid trades with zero wallet popups
+This command starts a local Ethereum network that runs on your local machine and can be used for testing and development. Learn how to [customize your network configuration](https://docs.scaffoldeth.io/quick-start/environment#1-initialize-a-local-blockchain).
 
-**Resources:**
-- Yellow Nitrolite docs: https://docs.yellow.org/docs/learn
-- Circle Gateway docs: https://developers.circle.com/gateway
-- Arc docs: https://docs.arc.network
+3. On a second terminal, deploy the test contract:
 
-### Phase 2: The Brain (Days 4-6) - Uniswap v4 + LI.FI
-**Goal:** Make capital move intelligently
+```
+yarn deploy
+```
 
-**Deliverables:**
-- [ ] Uniswap v4 custom hook (TWAP or stop-loss logic)
-- [ ] AI Agent script (Python/TS) that monitors Yellow session
-- [ ] LI.FI integration: Arc → Optimism/Base → Uniswap v4
-- [ ] Working trade execution flow
+This command deploys a test smart contract to the local network. You can find more information about how to customize your contract and deployment script in our [documentation](https://docs.scaffoldeth.io/quick-start/environment#2-deploy-your-smart-contract).
 
-**Resources:**
-- Uniswap v4 template: https://github.com/uniswapfoundation/v4-template
-- LI.FI SDK: https://docs.li.fi/sdk/overview
-- Scaffold-ETH-2 for hooks
+4. On a third terminal, start your NextJS app:
 
-### Phase 3: The Optimization (Days 7-8) - Sui + ENS
-**Goal:** Add high-performance hedging and identity
+```
+yarn start
+```
 
-**Deliverables:**
-- [ ] Sui Move contract (DeepBook integration)
-- [ ] LI.FI bridge to Sui (or mock if complex)
-- [ ] ENS registration (agent.eth)
-- [ ] ENS text records: risk profile, active chain, PnL
-- [ ] Frontend displays ENS-resolved agent identity
+Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
 
-**Resources:**
-- DeepBook docs: https://docs.sui.io/standards/deepbook
-- ENS docs: https://docs.ens.domains
+**What's next**:
 
-### Phase 4: Polish & Video (Day 9)
-**Goal:** Ship the demo
+Visit the [What's next section of our docs](https://docs.scaffoldeth.io/quick-start/environment#whats-next) to learn how to:
 
-**Deliverables:**
-- [ ] 3-minute demo video
-- [ ] Architecture diagram
-- [ ] GitHub repo cleanup
-- [ ] Submission on ETHGlobal
+- Edit your smart contracts
+- Edit your deployment scripts
+- Customize your frontend
+- Edit the app config
+- Writing and running tests
+- [Setting up external services and API keys](https://docs.scaffoldeth.io/deploying/deploy-smart-contracts#configuration-of-third-party-services-for-production-grade-apps)
 
-**Demo Script:**
-1. Yellow: "Look how fast I'm trading, no gas"
-2. Arc: "My funds are safe in the USDC Treasury"
-3. LI.FI/Uniswap: "AI Agent auto-routes to Uniswap v4 with custom Hook"
-4. Sui: "We hedged the risk on Sui's DeepBook for instant finality"
-5. ENS: "All managed by my on-chain identity"
+## Documentation
 
-## Development Log
+Visit our [docs](https://docs.scaffoldeth.io) to learn all the technical details and guides of Scaffold-ETH 2.
 
-### Day 1 (Feb 2, 2026)
-- [x] Project structure created
-- [ ] Research Yellow SDK
-- [ ] Research Arc deployment
-- [ ] Set up testnet wallets
+To know more about its features, check out our [website](https://scaffoldeth.io).
 
-## Notes
+## Contributing to Scaffold-ETH 2
 
-- **Judges prioritize video over code** - focus on demo quality
-- **Functional MVP > perfect code** - prove the concept works
-- **Architecture diagram required** for Arc prizes
-- **TxIDs required** for Uniswap prizes (testnet/mainnet)
-- **Video + GitHub required** for all submissions
+We welcome contributions to Scaffold-ETH 2!
 
-## Key Risks
-
-1. **Yellow SDK learning curve** - state channels are complex
-2. **Sui Move contract** - different paradigm from Solidity
-3. **Integration complexity** - 6 SDKs need to work together
-4. **Time constraint** - 9 days for full-stack multi-chain app
-
-## Mitigation Strategy
-
-- Start with Yellow + Arc core (days 1-3)
-- Mock Sui bridge if needed (focus on DeepBook logic)
-- ENS is low-hanging fruit (add on day 7-8)
-- Use Scaffold-ETH-2 templates where possible
-- Prioritize working demo over clean code
+Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.

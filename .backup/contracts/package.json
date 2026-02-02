@@ -1,0 +1,24 @@
+{
+  "name": "velocityvault-contracts",
+  "version": "1.0.0",
+  "description": "VelocityVault - USDC Treasury Vault on Arc",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy-vault.ts --network arcTestnet",
+    "test": "hardhat test",
+    "node": "hardhat node"
+  },
+  "keywords": ["defi", "vault", "arc", "circle", "hackmoney"],
+  "author": "VelocityVault Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@types/node": "^20.11.0",
+    "hardhat": "^2.19.5",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.1",
+    "dotenv": "^16.4.1"
+  }
+}

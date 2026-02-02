@@ -10,7 +10,6 @@ echo ""
 
 # Save current work
 echo "📦 Backing up current code..."
-cd velocityvault
 mkdir -p .backup
 cp -r contracts .backup/
 cp -r frontend .backup/
