@@ -1,0 +1,25 @@
+# Hardhat files
+cache
+artifacts
+typechain-types
+
+# Node
+node_modules
+dist
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Coverage
+coverage
+coverage.json
+
+# Build info
+*.dbg.json
+
+# Deployment artifacts
+deployments/*.json
+!deployments/.gitkeep
