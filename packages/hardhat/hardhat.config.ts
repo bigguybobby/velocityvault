@@ -126,6 +126,12 @@ const config: HardhatUserConfig = {
       url: "https://forno.celo-sepolia.celo-testnet.org/",
       accounts: [deployerPrivateKey],
     },
+    // Arc Testnet - Circle's L1 for VelocityVault
+    arcTestnet: {
+      url: process.env.ARC_TESTNET_RPC || "https://testnet-rpc.arc.network",
+      accounts: [deployerPrivateKey],
+      chainId: 999999, // Update with actual Arc testnet chain ID
+    },
   },
   // Configuration for harhdat-verify plugin
   etherscan: {

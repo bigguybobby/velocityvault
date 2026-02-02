@@ -1,91 +1,269 @@
-# 🏗 Scaffold-ETH 2
+# ⚡ VelocityVault
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+**Gasless Agentic Trading on Arc**
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+Built for ETHGlobal HackMoney 2026 | Targeting 6 sponsor prizes ($56k)
 
-> [!NOTE]
-> 🤖 Scaffold-ETH 2 is AI-ready! It has everything agents need to build on Ethereum. Check `.agents/`, `.claude/`, `.opencode` or `.cursor/` for more info.
+## The Vision
 
-⚙️ Built using NextJS, RainbowKit, Foundry/Hardhat, Wagmi, Viem, and Typescript.
+VelocityVault is a gasless, session-based trading interface powered by **Yellow Network** that controls an autonomous AI Agent. The agent manages a global USDC treasury on **Arc**, executes privacy-preserving strategies on **Uniswap v4**, routes capital via **LI.FI**, and hedges positions on **Sui** using DeepBook—all tied to a human-readable **ENS** identity.
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+**One interface. Zero gas fees. Instant execution.**
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
-
-## Requirements
-
-Before you begin, you need to install the following tools:
-
-- [Node (>= v20.18.3)](https://nodejs.org/en/download/)
-- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
-- [Git](https://git-scm.com/downloads)
-
-## Quickstart
-
-To get started with Scaffold-ETH 2, follow the steps below:
-
-1. Install the latest version of Scaffold-ETH 2
+## Architecture
 
 ```
-npx create-eth@latest
+User → Yellow UI (gasless sessions)
+         ↓
+    AI Agent (monitors intents)
+         ↓
+    Arc Treasury (USDC vault)
+         ↓
+    LI.FI (cross-chain routing)
+         ↓
+    ├─→ Uniswap v4 (EVM trading + custom hooks)
+    └─→ Sui DeepBook (high-frequency hedging)
+         ↓
+    ENS Identity (agent.eth - stores state/PnL)
 ```
 
-This command will install all the necessary packages and dependencies, so it might take a while.
+## Tech Stack
 
-> [!NOTE]
-> You can also initialize your project with one of our extensions to add specific features or starter-kits. Learn more in our [extensions documentation](https://docs.scaffoldeth.io/extensions/).
+| Component | Technology | Prize Target |
+|-----------|-----------|--------------|
+| **Frontend** | Next.js + wagmi + RainbowKit | - |
+| **Gasless UX** | Yellow Network (Nitrolite SDK) | $15k |
+| **Treasury** | VelocityVault.sol on Arc | $10k |
+| **Contracts** | Hardhat + OpenZeppelin | - |
+| **Trading** | Uniswap v4 custom hooks | $10k |
+| **Hedging** | Sui DeepBook | $10k |
+| **Routing** | LI.FI SDK | $6k |
+| **Identity** | ENS | $5k |
 
-2. Run a local network in the first terminal:
+## Quick Start
 
+### Prerequisites
+
+```bash
+node >= 18
+yarn
 ```
+
+### Installation
+
+```bash
+# Clone repo
+git clone https://github.com/bigguybobby/velocityvault.git
+cd velocityvault
+
+# Install dependencies
+yarn install
+
+# Start local chain
 yarn chain
-```
 
-This command starts a local Ethereum network that runs on your local machine and can be used for testing and development. Learn how to [customize your network configuration](https://docs.scaffoldeth.io/quick-start/environment#1-initialize-a-local-blockchain).
-
-3. On a second terminal, deploy the test contract:
-
-```
+# Deploy contracts (new terminal)
 yarn deploy
-```
 
-This command deploys a test smart contract to the local network. You can find more information about how to customize your contract and deployment script in our [documentation](https://docs.scaffoldeth.io/quick-start/environment#2-deploy-your-smart-contract).
-
-4. On a third terminal, start your NextJS app:
-
-```
+# Start frontend (new terminal)
 yarn start
 ```
 
-Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
+Visit: `http://localhost:3000`
 
-**What's next**:
+## Project Structure
 
-Visit the [What's next section of our docs](https://docs.scaffoldeth.io/quick-start/environment#whats-next) to learn how to:
+```
+velocityvault/
+├── packages/
+│   ├── hardhat/              # Smart contracts
+│   │   ├── contracts/
+│   │   │   └── VelocityVault.sol
+│   │   └── deploy/
+│   │       └── 01_deploy_velocity_vault.ts
+│   │
+│   └── nextjs/               # Frontend (Next.js)
+│       ├── app/
+│       │   └── trade/        # Trading interface
+│       ├── components/
+│       │   └── velocityvault/
+│       └── hooks/
+│           └── useYellow.ts  # Yellow SDK integration
+│
+├── docs/                     # Research & integration notes
+└── README.md
+```
 
-- Edit your smart contracts
-- Edit your deployment scripts
-- Customize your frontend
-- Edit the app config
-- Writing and running tests
-- [Setting up external services and API keys](https://docs.scaffoldeth.io/deploying/deploy-smart-contracts#configuration-of-third-party-services-for-production-grade-apps)
+## Smart Contracts
 
-## Documentation
+### VelocityVault.sol
 
-Visit our [docs](https://docs.scaffoldeth.io) to learn all the technical details and guides of Scaffold-ETH 2.
+USDC treasury contract on Arc testnet.
 
-To know more about its features, check out our [website](https://scaffoldeth.io).
+**Key Functions:**
 
-## Contributing to Scaffold-ETH 2
+```solidity
+// User functions
+deposit(uint256 amount)          // Deposit USDC
+withdraw(uint256 amount)         // Withdraw USDC
+balanceOf(address user)          // Check balance
 
-We welcome contributions to Scaffold-ETH 2!
+// Agent functions
+agentWithdraw(user, amount, destination, executionId)  // Execute trade
+agentDeposit(user, amount, executionId)                // Return profits
+```
 
-Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Scaffold-ETH 2.
+**Security:**
+- ✅ ReentrancyGuard
+- ✅ SafeERC20
+- ✅ Ownable
+- ✅ Custom errors
+
+## Features
+
+### 1. Gasless Trading (Yellow Network)
+
+- User signs **once** (session key)
+- All trades happen **off-chain**
+- **Zero gas fees** during session
+- Settlement when session closes
+
+### 2. Arc Treasury
+
+- USDC vault on Arc L1
+- Sub-second finality
+- USDC-native gas
+- Agent-managed execution
+
+### 3. AI Agent
+
+- Monitors Yellow session intents
+- Pulls funds from Arc vault
+- Routes via LI.FI
+- Executes on Uniswap v4 / Sui
+- Returns profits to vault
+
+### 4. Cross-Chain Routing (LI.FI)
+
+- Seamless Arc → Base/Optimism/Sui
+- Best route selection
+- Single-transaction UX
+
+### 5. Privacy Trading (Uniswap v4)
+
+- Custom hooks for agentic logic
+- Dark pool mechanics
+- MEV protection
+
+### 6. High-Frequency Hedging (Sui)
+
+- DeepBook CLOB integration
+- Instant finality
+- Limit order execution
+
+### 7. On-Chain Identity (ENS)
+
+- agent.eth resolves to agent address
+- Stores risk profile in text records
+- Tracks PnL on-chain
+
+## Development
+
+### Compile Contracts
+
+```bash
+cd packages/hardhat
+yarn hardhat compile
+```
+
+### Run Tests
+
+```bash
+yarn hardhat test
+```
+
+### Deploy to Arc Testnet
+
+```bash
+# Configure .env
+cp packages/hardhat/.env.example packages/hardhat/.env
+# Add: DEPLOYER_PRIVATE_KEY, USDC_ADDRESS, AGENT_ADDRESS
+
+# Deploy
+yarn deploy --network arcTestnet
+```
+
+### Start Frontend
+
+```bash
+cd packages/nextjs
+yarn dev
+```
+
+## Deployment Status
+
+- [ ] VelocityVault.sol → Arc testnet
+- [ ] Yellow SDK → Integrated
+- [ ] LI.FI SDK → Integrated
+- [ ] Uniswap v4 Hook → Deployed
+- [ ] Sui DeepBook → Integrated
+- [ ] ENS Registration → agent.eth
+
+## Roadmap
+
+### Day 1-2 (Feb 2-3) ✅
+- [x] Project setup
+- [x] VelocityVault contract
+- [x] Scaffold-ETH-2 migration
+- [ ] Deploy to Arc testnet
+
+### Day 3-4 (Feb 4-5)
+- [ ] Yellow SDK integration
+- [ ] Gasless trading UI
+- [ ] Agent monitoring script
+
+### Day 5-6 (Feb 6-7)
+- [ ] LI.FI integration
+- [ ] Uniswap v4 hooks
+- [ ] Full flow testing
+
+### Day 7-8 (Feb 8-9)
+- [ ] Sui DeepBook integration
+- [ ] ENS registration
+- [ ] Polish UI
+
+### Day 9 (Feb 10)
+- [ ] Demo video
+- [ ] Final testing
+- [ ] Submit
+
+## Resources
+
+- **Arc Docs:** https://docs.arc.network
+- **Yellow Docs:** https://docs.yellow.org
+- **LI.FI Docs:** https://docs.li.fi
+- **Uniswap v4:** https://docs.uniswap.org/contracts/v4
+- **Sui Docs:** https://docs.sui.io
+- **ENS Docs:** https://docs.ens.domains
+
+## Sponsors
+
+- 🟡 **Yellow Network** - Gasless session-based transactions
+- 🔵 **Arc** - USDC treasury on Circle's L1
+- 🦄 **Uniswap Foundation** - Agentic trading hooks
+- 🌊 **Sui** - High-frequency hedging with DeepBook
+- 🌈 **LI.FI** - Cross-chain liquidity routing
+- 🏷️ **ENS** - On-chain agent identity
+
+## License
+
+MIT
+
+## Team
+
+Built by [@bigguybobby](https://github.com/bigguybobby) for HackMoney 2026
+
+---
+
+**Status:** Day 1 complete - Contracts + Scaffold-ETH-2 setup ready  
+**Next:** Yellow SDK integration + gasless UI
