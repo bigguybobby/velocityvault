@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   devIndicators: false,
   typescript: {
@@ -26,4 +25,4 @@ if (isIpfs) {
   };
 }
 
-module.exports = nextConfig;
+export default nextConfig;
