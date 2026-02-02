@@ -1,3 +1,4 @@
+import { defineChain } from "viem";
 import * as chains from "viem/chains";
 
 export type ScaffoldConfig = {
@@ -11,9 +12,30 @@ export type ScaffoldConfig = {
 
 export const DEFAULT_ALCHEMY_API_KEY = "cR4WnXePioePZ5fFrnSiR";
 
+export const arcTestnet = defineChain({
+  id: 999999, // TODO: confirm Arc testnet chain id
+  name: "Arc Testnet",
+  nativeCurrency: {
+    name: "USDC",
+    symbol: "USDC",
+    decimals: 6,
+  },
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_ARC_TESTNET_RPC || "https://testnet-rpc.arc.network"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "ArcScan Testnet",
+      url: "https://testnet.arcscan.app",
+    },
+  },
+});
+
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [arcTestnet],
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect if you only target the local network (default is 4000)
@@ -28,8 +50,7 @@ const scaffoldConfig = {
   // If you want to use a different RPC for a specific network, you can add it here.
   // The key is the chain ID, and the value is the HTTP RPC URL
   rpcOverrides: {
-    // Example:
-    // [chains.mainnet.id]: "https://mainnet.rpc.buidlguidl.com",
+    [arcTestnet.id]: process.env.NEXT_PUBLIC_ARC_TESTNET_RPC || "https://testnet-rpc.arc.network",
   },
 
   // This is ours WalletConnect's default project ID.
@@ -38,7 +59,7 @@ const scaffoldConfig = {
   // .env.local for local testing, and in the Vercel/system env config for live apps.
   walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "3a8170812b534d0ff9d794f19a901d64",
 
-  // Only show the Burner Wallet when running on hardhat network
+  // Only show the Burner Wallet when running on hardhat/anvil network
   onlyLocalBurnerWallet: true,
 } as const satisfies ScaffoldConfig;
 

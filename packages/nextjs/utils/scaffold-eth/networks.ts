@@ -1,5 +1,5 @@
 import * as chains from "viem/chains";
-import scaffoldConfig from "~~/scaffold.config";
+import scaffoldConfig, { arcTestnet } from "~~/scaffold.config";
 
 type ChainAttributes = {
   // color | [lightThemeColor, darkThemeColor]
@@ -90,6 +90,9 @@ export const NETWORKS_EXTRA_DATA: Record<string, ChainAttributes> = {
   [chains.celoSepolia.id]: {
     color: "#476520",
   },
+  [arcTestnet.id]: {
+    color: ["#2563eb", "#38bdf8"],
+  },
 };
 
 /**
@@ -103,18 +106,23 @@ export function getBlockExplorerTxLink(chainId: number, txnHash: string) {
     return wagmiChain.id === chainId;
   });
 
-  if (targetChainArr.length === 0) {
+  if (targetChainArr.length > 0) {
+    const targetChain = targetChainArr[0] as keyof typeof chains;
+    const blockExplorerTxURL = chains[targetChain]?.blockExplorers?.default?.url;
+
+    if (!blockExplorerTxURL) {
+      return "";
+    }
+
+    return `${blockExplorerTxURL}/tx/${txnHash}`;
+  }
+
+  const customChain = scaffoldConfig.targetNetworks.find(network => network.id === chainId);
+  if (!customChain?.blockExplorers?.default?.url) {
     return "";
   }
 
-  const targetChain = targetChainArr[0] as keyof typeof chains;
-  const blockExplorerTxURL = chains[targetChain]?.blockExplorers?.default?.url;
-
-  if (!blockExplorerTxURL) {
-    return "";
-  }
-
-  return `${blockExplorerTxURL}/tx/${txnHash}`;
+  return `${customChain.blockExplorers.default.url}/tx/${txnHash}`;
 }
 
 /**

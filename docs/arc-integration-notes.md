@@ -214,7 +214,7 @@ contract VelocityVault {
 
 - Arc uses USDC as gas (no need for separate gas token)
 - Sub-second finality = fast settlement
-- EVM-compatible = use standard Solidity/Hardhat
+- EVM-compatible = use standard Solidity/Foundry
 - Circle SDK handles wallet management (no manual key storage)
 
 ## Demo Points

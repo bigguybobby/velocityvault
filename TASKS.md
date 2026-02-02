@@ -17,9 +17,7 @@
   - [x] Smart contract examples
 - [x] **CONTRACTS COMPLETE**
   - [x] VelocityVault.sol (USDC treasury with agent system)
-  - [x] Hardhat configuration
-  - [x] Deployment scripts
-  - [x] Test scripts
+  - [x] Foundry configuration
   - [x] Full documentation
 - [ ] Set up testnet wallets (Kacper to do)
   - [ ] Create Circle Developer account
@@ -27,17 +25,13 @@
   - [ ] Get testnet USDC from faucet
 
 ### Day 2 (Feb 3) - Arc Vault Contract
-- [ ] Write simple USDC vault contract for Arc
-  - [ ] Deposit function
-  - [ ] Withdraw function
-  - [ ] Agent permission system
-- [ ] Deploy to Arc testnet
+- [ ] Verify Arc testnet chain id + RPC
+- [ ] Deploy to Arc testnet (Kacper)
 - [ ] Test deposit/withdraw flow
 - [ ] **Checkpoint:** Project Check-in #1 Due (5:59am)
 
 ### Day 2-3 (Feb 3-4) - Yellow Frontend
 - [x] **FRONTEND COMPLETE** (Built on Day 1!)
-  - [x] React + Vite + TypeScript setup
   - [x] Yellow SDK integration (Nitrolite)
   - [x] Session-based authentication
   - [x] Gasless trading UI (Buy/Sell/Rebalance)
@@ -100,9 +94,8 @@
 
 ## Blocked / Questions
 
-- [ ] Do we have testnet ETH/USDC?
-- [ ] Yellow SDK - is there a working example app?
-- [ ] Arc - can we use existing Circle Gateway or need custom deployment?
+- [ ] Do we have testnet USDC?
+- [ ] Arc - confirm testnet chain id + RPC
 
 ## Notes
 
