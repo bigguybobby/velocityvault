@@ -20,6 +20,7 @@ const YELLOW_WS_URL = "wss://clearnet-sandbox.yellow.com/ws";
 const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY as `0x${string}`;
 const VAULT_ADDRESS = process.env.VAULT_ADDRESS as `0x${string}`;
 const RPC_URL = process.env.RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/demo";
+const BACKEND_URL = process.env.BACKEND_URL;
 
 if (!AGENT_PRIVATE_KEY) {
   throw new Error("AGENT_PRIVATE_KEY not set in .env");
@@ -148,6 +149,24 @@ async function handleTradeIntent(data: any) {
     console.log("  Asset:", intent.asset);
     console.log("  Amount:", intent.amount, "USDC");
     console.log("");
+
+    if (BACKEND_URL) {
+      fetch(`${BACKEND_URL}/intent/update-pnl`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userAddress: intent.user,
+          pnl: "0",
+          pnlPercent: 0,
+          trade: {
+            pair: `${intent.asset}/USDC`,
+            side: intent.action,
+            amount: intent.amount,
+            price: "0",
+          },
+        }),
+      }).catch(error => console.error("Failed to update backend", error));
+    }
 
     // Execute trade flow
     await executeTrade(intentId, intent);
