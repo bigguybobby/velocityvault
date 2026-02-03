@@ -1,21 +1,45 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useWalletClient } from "wagmi";
+import { useWalletClient, useAccount } from "wagmi";
 import { useYellowContext } from "~~/components/velocityvault/YellowProvider";
 import type { NextPage } from "next";
 
 const TradePage: NextPage = () => {
   const { data: walletClient } = useWalletClient();
+  const { address } = useAccount();
   const { session, connect, trade, isLoading, error, isReady } = useYellowContext();
 
   const [tradeAmount, setTradeAmount] = useState("10");
   const [tradeCount, setTradeCount] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [agentRunning, setAgentRunning] = useState(false);
+  const [activity, setActivity] = useState<any[]>([]);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!backendUrl || !address) return;
+
+    const fetchLogs = async () => {
+      try {
+        const res = await fetch(`${backendUrl}/logs/${address}`);
+        const json = await res.json();
+        if (json?.success) {
+          setActivity(json.data?.logs || []);
+        }
+      } catch (err) {
+        console.error("Failed to load activity", err);
+      }
+    };
+
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 15000);
+    return () => clearInterval(interval);
+  }, [backendUrl, address]);
 
   const handleConnect = async () => {
     if (!walletClient) return;
@@ -25,6 +49,46 @@ const TradePage: NextPage = () => {
   const handleTrade = async (action: "buy" | "sell") => {
     await trade(action, "BTC", tradeAmount);
     setTradeCount(prev => prev + 1);
+
+    if (backendUrl && address) {
+      fetch(`${backendUrl}/intent/update-pnl`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userAddress: address,
+          pnl: "0",
+          pnlPercent: 0,
+          trade: {
+            pair: "BTC/USDC",
+            side: action,
+            amount: tradeAmount,
+            price: "0",
+          },
+        }),
+      }).catch(err => console.error("Failed to log trade", err));
+    }
+  };
+
+  const handleAgent = async (action: "start" | "stop") => {
+    if (!backendUrl || !address) return;
+    try {
+      const res = await fetch(`${backendUrl}/intent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userAddress: address,
+          action,
+          strategy: "momentum",
+          params: {},
+        }),
+      });
+      const json = await res.json();
+      if (json?.success) {
+        setAgentRunning(action === "start");
+      }
+    } catch (err) {
+      console.error("Failed to update agent", err);
+    }
   };
 
   if (!mounted) return null;
@@ -194,6 +258,34 @@ const TradePage: NextPage = () => {
                   </button>
                 </div>
 
+                {/* Agent Control */}
+                <div className="mt-6 bg-base-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold">Agent Status</div>
+                      <div className="text-sm text-base-content/70">
+                        {agentRunning ? "Running" : "Stopped"}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        className="btn btn-sm btn-success"
+                        onClick={() => handleAgent("start")}
+                        disabled={isLoading || agentRunning}
+                      >
+                        Start Agent
+                      </button>
+                      <button
+                        className="btn btn-sm btn-error"
+                        onClick={() => handleAgent("stop")}
+                        disabled={isLoading || !agentRunning}
+                      >
+                        Stop Agent
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Demo Stats */}
                 <div className="divider"></div>
                 <div className="grid grid-cols-3 gap-4">
@@ -261,18 +353,22 @@ const TradePage: NextPage = () => {
               <div className="card-body">
                 <h3 className="card-title">Recent Activity</h3>
                 <div className="space-y-2">
-                  {tradeCount === 0 ? (
-                    <div className="text-center py-8 text-base-content/60">
-                      No trades yet. Click a button to execute your first gasless trade!
+                  {activity.length === 0 ? (
+                    <div className="text-center py-6 text-base-content/60">
+                      No activity yet. Start the agent or trigger a trade.
                     </div>
                   ) : (
-                    <div className="alert alert-success">
-                      <span>✅</span>
-                      <span>
-                        {tradeCount} gasless trade{tradeCount > 1 ? "s" : ""} executed
-                      </span>
-                      <span className="text-xs">Just now</span>
-                    </div>
+                    activity.slice(0, 6).map((log: any) => (
+                      <div key={log.id || `${log.action}-${log.created_at}`} className="alert alert-info">
+                        <span>⚡</span>
+                        <span className="text-sm">
+                          {log.action} {log.pair ? `(${log.pair})` : ""}
+                        </span>
+                        <span className="text-xs">
+                          {log.created_at ? new Date(log.created_at).toLocaleTimeString() : "now"}
+                        </span>
+                      </div>
+                    ))
                   )}
                 </div>
 
@@ -289,6 +385,12 @@ const TradePage: NextPage = () => {
                       <span className="font-mono text-xs">{session.channelId.slice(0, 10)}...</span>
                     </div>
                   )}
+                </div>
+
+                <div className="divider"></div>
+                <div className="space-y-2 text-sm">
+                  <div className="font-semibold">Live Action Log</div>
+                  <div>Bridging via LI.FI → Executing on Uniswap → Hedging on Sui</div>
                 </div>
               </div>
             </div>
