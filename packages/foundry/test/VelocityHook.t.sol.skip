@@ -1,0 +1,392 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "forge-std/Test.sol";
+import {IPoolManager} from "v4-core/interfaces/IPoolManager.sol";
+import {IHooks} from "v4-core/interfaces/IHooks.sol";
+import {Hooks} from "v4-core/libraries/Hooks.sol";
+import {PoolKey} from "v4-core/types/PoolKey.sol";
+import {PoolId, PoolIdLibrary} from "v4-core/types/PoolId.sol";
+import {BalanceDelta, toBalanceDelta} from "v4-core/types/BalanceDelta.sol";
+import {Currency, CurrencyLibrary} from "v4-core/types/Currency.sol";
+import {PoolSwapTest} from "v4-core/test/PoolSwapTest.sol";
+import {Deployers} from "v4-core/test/utils/Deployers.sol";
+import {VelocityHook} from "../src/VelocityHook.sol";
+
+contract VelocityHookTest is Test, Deployers {
+    using PoolIdLibrary for PoolKey;
+    using CurrencyLibrary for Currency;
+
+    VelocityHook private hook;
+    PoolKey private poolKey;
+    PoolId private poolId;
+
+    address private owner;
+    address private operator;
+    address private unauthorizedUser;
+
+    bytes32 private constant VALID_STRATEGY = keccak256("momentum-crosschain-arb-v1");
+    bytes32 private constant INVALID_STRATEGY = keccak256("unknown-strategy");
+
+    uint256 private constant DEFAULT_SLIPPAGE_BPS = 500; // 5%
+
+    /* ========== EVENTS (for testing) ========== */
+
+    event PolicyViolation(
+        address indexed operator,
+        bytes32 indexed strategyHash,
+        string reason,
+        PoolId indexed poolId
+    );
+
+    event TradeExecuted(
+        address indexed operator,
+        bytes32 indexed strategyHash,
+        PoolId indexed poolId,
+        int256 amountSpecified,
+        uint256 timestamp
+    );
+
+    event StrategyUpdated(bytes32 indexed strategyHash, bool allowed);
+    event OperatorUpdated(address indexed operator, bool authorized);
+    event SlippageUpdated(uint256 oldSlippage, uint256 newSlippage);
+
+    function setUp() public {
+        owner = address(this);
+        operator = makeAddr("operator");
+        unauthorizedUser = makeAddr("unauthorized");
+
+        // Deploy Uniswap v4 core contracts
+        deployFreshManagerAndRouters();
+        deployMintAndApprove2Currencies();
+
+        // Deploy hook with proper flag address
+        uint160 flags = uint160(Hooks.BEFORE_SWAP_FLAG | Hooks.AFTER_SWAP_FLAG);
+        address hookAddress = address(flags);
+
+        // Deploy hook to the flagged address using CREATE2
+        deployCodeTo(
+            "VelocityHook.sol:VelocityHook",
+            abi.encode(manager),
+            hookAddress
+        );
+        hook = VelocityHook(hookAddress);
+
+        // Setup pool with hook
+        (poolKey, poolId) = initPool(
+            currency0,
+            currency1,
+            hook,
+            3000, // fee
+            SQRT_PRICE_1_1
+        );
+
+        // Configure hook permissions
+        hook.setOperator(operator, true);
+        hook.setStrategy(VALID_STRATEGY, true);
+    }
+
+    /* ========== ADMIN TESTS ========== */
+
+    function testSetStrategy() public {
+        bytes32 newStrategy = keccak256("new-strategy");
+
+        vm.expectEmit(true, false, false, true);
+        emit StrategyUpdated(newStrategy, true);
+
+        hook.setStrategy(newStrategy, true);
+        assertTrue(hook.isStrategyAllowed(newStrategy));
+
+        hook.setStrategy(newStrategy, false);
+        assertFalse(hook.isStrategyAllowed(newStrategy));
+    }
+
+    function testSetStrategiesBatch() public {
+        bytes32[] memory strategies = new bytes32[](3);
+        strategies[0] = keccak256("strategy-1");
+        strategies[1] = keccak256("strategy-2");
+        strategies[2] = keccak256("strategy-3");
+
+        bool[] memory allowed = new bool[](3);
+        allowed[0] = true;
+        allowed[1] = true;
+        allowed[2] = false;
+
+        hook.setStrategiesBatch(strategies, allowed);
+
+        assertTrue(hook.isStrategyAllowed(strategies[0]));
+        assertTrue(hook.isStrategyAllowed(strategies[1]));
+        assertFalse(hook.isStrategyAllowed(strategies[2]));
+    }
+
+    function testSetOperator() public {
+        address newOperator = makeAddr("newOperator");
+
+        vm.expectEmit(true, false, false, true);
+        emit OperatorUpdated(newOperator, true);
+
+        hook.setOperator(newOperator, true);
+        assertTrue(hook.isOperatorAuthorized(newOperator));
+
+        hook.setOperator(newOperator, false);
+        assertFalse(hook.isOperatorAuthorized(newOperator));
+    }
+
+    function testSetOperatorRevertsZeroAddress() public {
+        vm.expectRevert(VelocityHook.ZeroAddress.selector);
+        hook.setOperator(address(0), true);
+    }
+
+    function testSetMaxSlippage() public {
+        uint256 newSlippage = 1000; // 10%
+
+        vm.expectEmit(true, true, false, true);
+        emit SlippageUpdated(DEFAULT_SLIPPAGE_BPS, newSlippage);
+
+        hook.setMaxSlippage(newSlippage);
+        assertEq(hook.maxSlippageBps(), newSlippage);
+    }
+
+    function testSetMaxSlippageRevertsIfTooHigh() public {
+        vm.expectRevert(abi.encodeWithSelector(VelocityHook.SlippageTooHigh.selector, 10001));
+        hook.setMaxSlippage(10001); // > 100%
+    }
+
+    function testOnlyOwnerCanSetStrategy() public {
+        vm.prank(unauthorizedUser);
+        vm.expectRevert(VelocityHook.OnlyOwner.selector);
+        hook.setStrategy(VALID_STRATEGY, false);
+    }
+
+    function testOnlyOwnerCanSetOperator() public {
+        vm.prank(unauthorizedUser);
+        vm.expectRevert(VelocityHook.OnlyOwner.selector);
+        hook.setOperator(unauthorizedUser, true);
+    }
+
+    function testTransferOwnership() public {
+        address newOwner = makeAddr("newOwner");
+
+        hook.transferOwnership(newOwner);
+        assertEq(hook.owner(), newOwner);
+
+        // Old owner can no longer admin
+        vm.expectRevert(VelocityHook.OnlyOwner.selector);
+        hook.setMaxSlippage(100);
+
+        // New owner can admin
+        vm.prank(newOwner);
+        hook.setMaxSlippage(100);
+    }
+
+    /* ========== SWAP VALIDATION TESTS ========== */
+
+    function testSwapWithValidPolicy() public {
+        bytes memory hookData = hook.encodeSwapPolicy(VALID_STRATEGY, 0, operator);
+
+        // Setup swap params
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        // Execute swap - should succeed
+        vm.expectEmit(true, true, true, false);
+        emit TradeExecuted(operator, VALID_STRATEGY, poolId, params.amountSpecified, block.timestamp);
+
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    function testSwapRevertsWithUnauthorizedOperator() public {
+        bytes memory hookData = hook.encodeSwapPolicy(VALID_STRATEGY, 0, unauthorizedUser);
+
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        vm.expectRevert(abi.encodeWithSelector(
+            VelocityHook.UnauthorizedOperator.selector,
+            unauthorizedUser
+        ));
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    function testSwapRevertsWithInvalidStrategy() public {
+        bytes memory hookData = hook.encodeSwapPolicy(INVALID_STRATEGY, 0, operator);
+
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        vm.expectRevert(abi.encodeWithSelector(
+            VelocityHook.InvalidStrategyHash.selector,
+            INVALID_STRATEGY
+        ));
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    function testSwapRevertsWithEmptyHookData() public {
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        vm.expectRevert(VelocityHook.InvalidHookData.selector);
+        swapRouter.swap(poolKey, params, settings, "");
+    }
+
+    function testSwapWithCustomSlippage() public {
+        uint256 customSlippage = 100; // 1%
+        bytes memory hookData = hook.encodeSwapPolicy(VALID_STRATEGY, customSlippage, operator);
+
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        // Should succeed with custom slippage
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    /* ========== POLICY VIOLATION EVENT TESTS ========== */
+
+    function testEmitsPolicyViolationForUnauthorizedOperator() public {
+        bytes memory hookData = hook.encodeSwapPolicy(VALID_STRATEGY, 0, unauthorizedUser);
+
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        vm.expectEmit(true, true, false, true);
+        emit PolicyViolation(
+            unauthorizedUser,
+            VALID_STRATEGY,
+            "UNAUTHORIZED_OPERATOR",
+            poolId
+        );
+
+        vm.expectRevert();
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    function testEmitsPolicyViolationForInvalidStrategy() public {
+        bytes memory hookData = hook.encodeSwapPolicy(INVALID_STRATEGY, 0, operator);
+
+        IPoolManager.SwapParams memory params = IPoolManager.SwapParams({
+            zeroForOne: true,
+            amountSpecified: -1e18,
+            sqrtPriceLimitX96: MIN_PRICE_LIMIT
+        });
+
+        PoolSwapTest.TestSettings memory settings = PoolSwapTest.TestSettings({
+            takeClaims: false,
+            settleUsingBurn: false
+        });
+
+        vm.expectEmit(true, true, false, true);
+        emit PolicyViolation(
+            operator,
+            INVALID_STRATEGY,
+            "INVALID_STRATEGY",
+            poolId
+        );
+
+        vm.expectRevert();
+        swapRouter.swap(poolKey, params, settings, hookData);
+    }
+
+    /* ========== HELPER / VIEW TESTS ========== */
+
+    function testEncodeSwapPolicy() public view {
+        bytes memory encoded = hook.encodeSwapPolicy(VALID_STRATEGY, 250, operator);
+
+        VelocityHook.SwapPolicy memory decoded = abi.decode(encoded, (VelocityHook.SwapPolicy));
+
+        assertEq(decoded.strategyHash, VALID_STRATEGY);
+        assertEq(decoded.maxSlippageBps, 250);
+        assertEq(decoded.operator, operator);
+    }
+
+    function testGetHookPermissions() public view {
+        Hooks.Permissions memory perms = hook.getHookPermissions();
+
+        assertTrue(perms.beforeSwap);
+        assertTrue(perms.afterSwap);
+        assertFalse(perms.beforeInitialize);
+        assertFalse(perms.afterInitialize);
+        assertFalse(perms.beforeAddLiquidity);
+        assertFalse(perms.afterAddLiquidity);
+    }
+
+    function testDefaultSlippage() public view {
+        assertEq(hook.maxSlippageBps(), DEFAULT_SLIPPAGE_BPS);
+        assertEq(hook.DEFAULT_MAX_SLIPPAGE_BPS(), 500);
+        assertEq(hook.BPS_DENOMINATOR(), 10_000);
+    }
+
+    /* ========== FUZZ TESTS ========== */
+
+    function testFuzzSetSlippage(uint256 slippage) public {
+        slippage = bound(slippage, 0, 10_000);
+
+        hook.setMaxSlippage(slippage);
+        assertEq(hook.maxSlippageBps(), slippage);
+    }
+
+    function testFuzzStrategyHash(bytes32 strategyHash) public {
+        hook.setStrategy(strategyHash, true);
+        assertTrue(hook.isStrategyAllowed(strategyHash));
+
+        hook.setStrategy(strategyHash, false);
+        assertFalse(hook.isStrategyAllowed(strategyHash));
+    }
+
+    function testFuzzOperatorAuthorization(address operatorAddr) public {
+        vm.assume(operatorAddr != address(0));
+
+        hook.setOperator(operatorAddr, true);
+        assertTrue(hook.isOperatorAuthorized(operatorAddr));
+
+        hook.setOperator(operatorAddr, false);
+        assertFalse(hook.isOperatorAuthorized(operatorAddr));
+    }
+}

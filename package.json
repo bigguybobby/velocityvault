@@ -5,7 +5,10 @@
   "workspaces": {
     "packages": [
       "packages/foundry",
-      "packages/nextjs"
+      "packages/nextjs",
+      "packages/backend",
+      "packages/agent",
+      "packages/sui"
     ]
   },
   "scripts": {
@@ -28,7 +31,10 @@
     "vercel": "yarn workspace @se-2/nextjs vercel",
     "vercel:yolo": "yarn workspace @se-2/nextjs vercel:yolo",
     "ipfs": "yarn workspace @se-2/nextjs ipfs",
-    "vercel:login": "yarn workspace @se-2/nextjs vercel:login"
+    "vercel:login": "yarn workspace @se-2/nextjs vercel:login",
+    "backend:dev": "yarn workspace @velocityvault/backend dev",
+    "backend:build": "yarn workspace @velocityvault/backend build",
+    "backend:start": "yarn workspace @velocityvault/backend start"
   },
   "packageManager": "yarn@3.2.3",
   "devDependencies": {

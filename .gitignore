@@ -55,3 +55,4 @@ pnpm-debug.log*
 # Deployment
 deployments/*.json
 !deployments/.gitkeep
+.credentials/

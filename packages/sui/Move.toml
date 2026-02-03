@@ -1,0 +1,34 @@
+[package]
+name = "velocity"
+edition = "2024.beta"
+version = "0.0.1"
+authors = ["VelocityVault Team"]
+published-at = "0x0"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet" }
+
+# DeepBook v3 dependency - use published package on mainnet/testnet
+# For local development, clone deepbookv3 repo and use local path:
+# DeepBook = { local = "../deepbookv3/packages/deepbook" }
+DeepBook = { git = "https://github.com/MystenLabs/deepbookv3.git", subdir = "packages/deepbook", rev = "main" }
+
+[addresses]
+velocity = "0x0"
+sui = "0x2"
+# DeepBook v3 mainnet package ID (version 6)
+deepbook = "0x337f4f4f6567fcd778d5454f27c16c70e2f274cc6377ea6249ddf491482ef497"
+
+[dev-addresses]
+velocity = "0x0"
+
+[dev-dependencies]
+
+# === Build Configuration ===
+# For testnet deployment:
+#   sui client switch --env testnet
+#   sui client publish --gas-budget 100000000
+#
+# For mainnet deployment:
+#   sui client switch --env mainnet
+#   sui client publish --gas-budget 100000000
