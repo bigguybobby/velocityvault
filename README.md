@@ -60,6 +60,12 @@ cd velocityvault
 # Install dependencies
 yarn install
 
+# Install Foundry deps (first time only)
+cd packages/foundry
+forge install OpenZeppelin/openzeppelin-contracts
+forge install foundry-rs/forge-std
+cd ../..
+
 # Start local chain
 yarn chain
 
@@ -186,20 +192,20 @@ cd packages/nextjs
 yarn dev
 ```
 
-## Current Status (Feb 2, 2026 - 23:00 GMT+1)
+## Current Status
 
-**Day 1 Complete - Ahead of Schedule!**
+**Core MVP is in place.**
 
-- [x] Project setup (Scaffold-ETH-2)
+- [x] Monorepo setup (Next.js + Foundry)
 - [x] VelocityVault.sol smart contract
 - [x] Yellow SDK integration (gasless UI)
-- [x] AI agent with LI.FI routing
-- [x] Complete documentation
-- [ ] Deploy to Arc testnet (tomorrow)
+- [x] AI agent scaffold with LI.FI routing
+- [x] Documentation + demo guides
+- [ ] Deploy to Arc testnet (needs USDC + RPC confirmation)
+- [ ] End-to-end test with real testnet USDC
 - [ ] Uniswap v4 hooks (optional)
 - [ ] Sui DeepBook (optional)
 - [ ] ENS integration (optional)
 
-**GitHub:** 6 commits, all documented  
-**Demo-Ready:** Yes (works on localhost)  
-**Testnet Deployment:** Planned for Day 2
+**Demo-Ready:** Yes (local)  
+**Testnet Deployment:** Pending Arc setup

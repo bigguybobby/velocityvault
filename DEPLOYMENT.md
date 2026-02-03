@@ -11,6 +11,7 @@
 ```bash
 cd packages/foundry
 forge install OpenZeppelin/openzeppelin-contracts
+forge install foundry-rs/forge-std
 ```
 
 ## Compile
@@ -25,11 +26,9 @@ export PRIVATE_KEY="0x..."
 export USDC_ADDRESS="0x..."
 export AGENT_ADDRESS="0x..."
 
-forge create \
+forge script script/DeployVelocityVault.s.sol:DeployVelocityVault \
   --rpc-url $ARC_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  src/VelocityVault.sol:VelocityVault \
-  --constructor-args $USDC_ADDRESS $AGENT_ADDRESS
+  --broadcast
 ```
 
 ## Verify

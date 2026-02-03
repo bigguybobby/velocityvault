@@ -1,36 +1,30 @@
 # VelocityVault - Morning Summary
 
 **Date:** Feb 3, 2026  
-**Time:** Created at 23:45 GMT+1 (Feb 2)  
-**Status:** Night Build Complete - Ready for Review
+**Time:** Updated at 08:20 GMT+1  
+**Status:** Core MVP solidified - tests + deploy script added
 
 ## TL;DR
 
-✅ **Foundry migration** - Hardhat removed  
-✅ **Core UI** - Gasless trading demo ready  
-✅ **Docs updated** - README + prizes checklist  
-✅ **2 days ahead**
+✅ **Foundry tests** added (deposit/withdraw/agent flows)  
+✅ **Deploy script** added for Arc testnet  
+✅ **Repo cleaned** (removed legacy folders)  
+✅ **Docs refreshed** (README + deployment guide)
 
 **GitHub:** https://github.com/bigguybobby/velocityvault/tree/scaffold-eth-2-migration
 
-## What I Built (Last Night)
+## What’s In Place Now
 
-### 1. Project Setup
-- Scaffold-ETH-2 professional template
-- Next.js 14 + wagmi + RainbowKit
-- Foundry contracts
-- TypeScript throughout
-
-### 2. Smart Contracts
+### 1. Contracts (Foundry)
 **File:** `packages/foundry/src/VelocityVault.sol`
 
 - USDC treasury on Arc
 - User deposit/withdraw
 - Agent permission system
 - Security: ReentrancyGuard, SafeERC20, Ownable
-- Ready for manual deployment
+- **New:** Foundry tests + deploy script
 
-### 3. Frontend (Gasless Trading UI)
+### 2. Frontend (Gasless Trading UI)
 **Files:**
 - `packages/nextjs/app/page.tsx` (home)
 - `packages/nextjs/app/trade/page.tsx` (trading)
@@ -41,22 +35,20 @@ Features:
 - Session-based authentication
 - Gasless buy/sell buttons
 - Real-time balance updates
-- DaisyUI components
 
-### 4. AI Agent
+### 3. AI Agent
 **File:** `packages/agent/src/monitor.ts`
 
 - Monitors Yellow WebSocket
 - Detects trade intents
-- LI.FI cross-chain routing
-- Trade execution flow
+- LI.FI cross-chain routing scaffold
 
-### 5. Documentation
+### 4. Documentation
 **Files:**
-- `README.md` - Updated with Foundry
-- `docs/prizes.md` - Prize requirements checklist
-- `PROGRESS.md` - Day-by-day tracker
-- `DEMO-GUIDE.md` - Demo scripts
+- `README.md`
+- `DEPLOYMENT.md`
+- `PROGRESS.md`
+- `DEMO-GUIDE.md`
 
 ## Quick Review Checklist
 
@@ -83,8 +75,9 @@ yarn start        # Terminal 2
 
 ### ✅ Smart Contracts
 - Compiles with Foundry
-- OpenZeppelin remappings set
-- Ready for Arc testnet deploy (by Kacper)
+- OpenZeppelin + forge-std remappings set
+- Tests cover core flows
+- Deploy script ready for Arc testnet
 
 ### ✅ Frontend
 - Runs locally (yarn start)
@@ -102,18 +95,17 @@ yarn start        # Terminal 2
 
 ## What's Next (Today - Day 2)
 
-### Priority 1: Testnet Deployment (Kacper)
-1. Deploy VelocityVault to Arc testnet
-2. Get testnet USDC
-3. Test full flow with real funds
-4. Record demo footage
+### Priority 1: Testnet Deployment
+1. Confirm Arc RPC + chain id
+2. Deploy VelocityVault to Arc testnet
+3. Get testnet USDC
+4. Test full flow with real funds
 
-### Priority 2: Optional Features
-- Uniswap v4 hooks (for $10k prize)
-- Sui DeepBook integration (for $10k prize)
-- ENS setup (for $5k prize)
+### Priority 2: Demo
+- Record demo footage
+- Tighten UI copy + error handling
 
-### Priority 3: Polish
-- UI improvements
-- Error handling
-- More testing
+### Priority 3: Optional Features
+- Uniswap v4 hooks
+- Sui DeepBook integration
+- ENS setup

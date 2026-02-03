@@ -18,6 +18,7 @@
 - [x] **CONTRACTS COMPLETE**
   - [x] VelocityVault.sol (USDC treasury with agent system)
   - [x] Foundry configuration
+  - [x] Foundry tests + deploy script
   - [x] Full documentation
 - [ ] Set up testnet wallets (Kacper to do)
   - [ ] Create Circle Developer account

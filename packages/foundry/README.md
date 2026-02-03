@@ -4,10 +4,11 @@ This package replaces the old Hardhat setup. It contains the VelocityVault contr
 
 ## Prereqs
 - Install Foundry: https://book.getfoundry.sh/getting-started/installation
-- Install OpenZeppelin contracts:
+- Install dependencies:
 
 ```bash
 forge install OpenZeppelin/openzeppelin-contracts
+forge install foundry-rs/forge-std
 ```
 
 ## Commands
@@ -19,6 +20,18 @@ forge test
 forge fmt
 ```
 
+## Deploy
+```bash
+cd packages/foundry
+export ARC_RPC_URL="https://testnet-rpc.arc.network"
+export PRIVATE_KEY="0x..."
+export USDC_ADDRESS="0x..."
+export AGENT_ADDRESS="0x..."
+
+forge script script/DeployVelocityVault.s.sol:DeployVelocityVault \
+  --rpc-url $ARC_RPC_URL \
+  --broadcast
+```
+
 ## Notes
-- Arc testnet deployment is handled manually (no deploy scripts included by default).
 - Update `foundry.toml` RPCs once Arc testnet chain id/RPC are confirmed.

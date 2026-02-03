@@ -1,31 +1,27 @@
 # VelocityVault - Progress Report
 
-**Last Updated:** Feb 2, 2026 - 23:30 GMT+1  
-**Status:** Day 1 Complete - Core Features + Documentation Done
+**Last Updated:** Feb 3, 2026 - 08:20 GMT+1  
+**Status:** Core MVP Solidified - Tests + Deploy Script Added
 
-## ✅ Completed Tonight
+## ✅ Completed
 
-### 1. GitHub Repo Setup
-- **URL:** https://github.com/bigguybobby/velocityvault
-- **Branch:** `scaffold-eth-2-migration` (active development)
-- **Status:** Public, ready for review
+### 1. Repo Cleanup
+- Removed legacy folders (old frontend/agent/hardhat scripts) to reduce confusion
+- Kept monorepo with `packages/foundry` + `packages/nextjs`
 
-### 2. Scaffold-ETH-2 Migration
-- ✅ Migrated from custom setup to professional template
-- ✅ Next.js + wagmi + RainbowKit (frontend)
-- ✅ Foundry (contracts)
-- ✅ Hot reload, clean UI components
-- ✅ VelocityVault.sol integrated
-
-### 3. Smart Contract Setup
+### 2. Contracts (Foundry)
 - ✅ VelocityVault.sol in `packages/foundry/src/`
 - ✅ Foundry config + OpenZeppelin remappings
-- ✅ Ready for manual deployment (Kacper will deploy)
+- ✅ **New:** Foundry tests for deposits/withdrawals/agent flows
+- ✅ **New:** Deploy script (`script/DeployVelocityVault.s.sol`)
+
+### 3. Frontend
+- ✅ Next.js 14 + wagmi + RainbowKit
+- ✅ Gasless trading UI + Yellow session flow
 
 ### 4. Documentation
-- ✅ Updated main README
-- ✅ Added HackMoney prizes checklist
-- ✅ Clear project structure
+- ✅ Updated README + Deployment guide
+- ✅ Demo guides + status docs refreshed
 
 ## 📂 Project Structure
 
@@ -55,28 +51,27 @@ velocityvault/
    yarn start          # Next.js
    ```
 
-2. **Contract Compilation**
+2. **Contract Compilation + Tests**
    - VelocityVault.sol compiles via Foundry
-   - OpenZeppelin remappings set
+   - OpenZeppelin + forge-std remappings set
+   - Tests cover deposit/withdraw/agent flows
 
 3. **Frontend Base**
    - Next.js 14 with App Router
    - wagmi + RainbowKit wallet connection
-   - Scaffold-ETH-2 UI components
+   - Trading UI ready for Yellow session wiring
 
-## 🚧 Next Steps (Tomorrow)
+## 🚧 Next Steps
 
-### Phase 1: Yellow SDK Integration
-- [ ] Validate Yellow SDK session flow
-- [ ] Test session-based auth UX
+### Phase 1: Arc Testnet
+- [ ] Confirm Arc RPC + chain id
+- [ ] Deploy VelocityVault to Arc testnet
+- [ ] Fund with testnet USDC
+- [ ] End-to-end test via UI
 
-### Phase 2: Trading UI
-- [ ] Harden /trade flows
-- [ ] Verify UI states with Arc testnet
-
-### Phase 3: Demo
-- [ ] Deploy VelocityVault to Arc testnet (Kacper)
+### Phase 2: Demo
 - [ ] Record demo footage
+- [ ] Polish UI copy + error states
 
 ## 📊 Timeline Status
 
@@ -88,6 +83,6 @@ velocityvault/
 - Day 9: Polish + Submit
 
 **Actual Progress:**
-- ✅ Day 1: Contracts + Scaffold-ETH-2 (DONE)
-- 🎯 Day 2: Yellow SDK + Trading UI (in progress)
-- **Status:** 1 day ahead of schedule
+- ✅ Core MVP: contracts + UI + docs
+- ✅ Tests + deploy script added
+- **Status:** Ready for Arc testnet deployment
