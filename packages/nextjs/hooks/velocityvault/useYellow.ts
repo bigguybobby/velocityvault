@@ -6,13 +6,8 @@ import {
   NitroliteClient,
   WalletStateSigner,
   createAuthRequestMessage,
-  createEIP712AuthMessageSigner,
-  createAuthVerifyMessageFromChallenge,
   createECDSAMessageSigner,
-  createCreateChannelMessage,
-  createResizeChannelMessage,
   createTransferMessage,
-  createGetLedgerBalancesMessage,
 } from "@erc7824/nitrolite";
 
 const YELLOW_WS_URL = "wss://clearnet-sandbox.yellow.com/ws";
@@ -27,7 +22,7 @@ export interface YellowSession {
 }
 
 export function useYellow() {
-  const { address, isConnected: walletConnected } = useAccount();
+  const { isConnected: walletConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
 
   const [session, setSession] = useState<YellowSession>({
@@ -42,40 +37,11 @@ export function useYellow() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize WebSocket
   useEffect(() => {
-    if (!session.isConnected || !address) return;
-
-    const websocket = new WebSocket(YELLOW_WS_URL);
-
-    websocket.onopen = () => {
-      console.log("✅ Connected to Yellow Network");
-    };
-
-    websocket.onmessage = event => {
-      try {
-        const response = JSON.parse(event.data);
-        handleWebSocketMessage(response);
-      } catch (err) {
-        console.error("WS message error:", err);
-      }
-    };
-
-    websocket.onerror = error => {
-      console.error("WebSocket error:", error);
-      setError("Connection to Yellow Network failed");
-    };
-
-    websocket.onclose = () => {
-      console.log("❌ Disconnected from Yellow Network");
-    };
-
-    setWs(websocket);
-
     return () => {
-      websocket.close();
+      ws?.close();
     };
-  }, [session.isConnected, address]);
+  }, [ws]);
 
   const handleWebSocketMessage = useCallback((response: any) => {
     console.log("📨 WS message:", response);
@@ -165,10 +131,6 @@ export function useYellow() {
 
         setClient(nitroliteClient);
 
-        // Generate session keypair
-        const sessionPrivateKey = ("0x" +
-          Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")) as `0x${string}`;
-
         // Create auth request
         const authParams = {
           session_key: wc.account.address,
@@ -183,15 +145,30 @@ export function useYellow() {
           ...authParams,
         });
 
-        // Wait for WS to be ready
+        // Open WS and send auth request
         const websocket = new WebSocket(YELLOW_WS_URL);
-        await new Promise(resolve => {
-          websocket.onopen = resolve;
-        });
+        websocket.onopen = () => {
+          console.log("✅ Connected to Yellow Network");
+          websocket.send(authRequestMsg);
+        };
+        websocket.onmessage = event => {
+          try {
+            const response = JSON.parse(event.data);
+            handleWebSocketMessage(response);
+          } catch (err) {
+            console.error("WS message error:", err);
+          }
+        };
+        websocket.onerror = error => {
+          console.error("WebSocket error:", error);
+          setError("Connection to Yellow Network failed");
+          setIsLoading(false);
+        };
+        websocket.onclose = () => {
+          console.log("❌ Disconnected from Yellow Network");
+        };
 
-        // Send auth request
-        websocket.send(authRequestMsg);
-
+        setWs(websocket);
         setSession(prev => ({
           ...prev,
           isConnected: true,
@@ -204,7 +181,7 @@ export function useYellow() {
         setIsLoading(false);
       }
     },
-    [],
+    [handleWebSocketMessage],
   );
 
   const trade = useCallback(
