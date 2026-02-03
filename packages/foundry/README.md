@@ -25,6 +25,19 @@ forge fmt
 cd packages/foundry
 export ARC_RPC_URL="https://testnet-rpc.arc.network"
 export PRIVATE_KEY="0x..."
+export AGENT_ADDRESS="0x..."
+export BRIDGE_EXECUTOR="0x..." # e.g., LI.FI executor/router on Arc
+
+forge script script/DeployVelocityTreasury.s.sol:DeployVelocityTreasury \
+  --rpc-url $ARC_RPC_URL \
+  --broadcast
+```
+
+### Legacy Vault Deploy (if needed)
+```bash
+cd packages/foundry
+export ARC_RPC_URL="https://testnet-rpc.arc.network"
+export PRIVATE_KEY="0x..."
 export USDC_ADDRESS="0x..."
 export AGENT_ADDRESS="0x..."
 
